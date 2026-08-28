@@ -1,0 +1,23 @@
+/**:
+  ros__parameters:
+    input_topic: lf/lowstate
+    output_topic: sensor/imu/data
+    temperature_topic: sensor/imu/temperature
+    frame_id: imu_link
+
+    # receipt is the safe default for the loose-coupled EKF. Use tick_aligned
+    # only after calibrating timestamp_offset_sec against the LiDAR/PTP clock.
+    timestamp_mode: receipt
+    tick_period_sec: 0.000001
+    timestamp_offset_sec: 0.0
+
+    # Unitree LowState quaternion is w, x, y, z. Axis mapping assumes the B2
+    # IMU follows ROS x-forward, y-left, z-up; verify on the real robot.
+    orientation_order: wxyz
+    axis_order: [0, 1, 2]
+    axis_sign: [1.0, 1.0, 1.0]
+
+    orientation_covariance_diagonal: [0.01, 0.01, 0.04]
+    angular_velocity_covariance_diagonal: [0.0025, 0.0025, 0.0025]
+    linear_acceleration_covariance_diagonal: [0.04, 0.04, 0.04]
+    source_timeout_sec: 1.0

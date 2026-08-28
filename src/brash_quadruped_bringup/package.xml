@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>brash_quadruped_bringup</name>
+  <version>0.1.0</version>
+  <description>Top-level B2W, Z1, Hesai XT32, LIO, and RGB-D bringup.</description>
+  <maintainer email="engineering@brashrobotics.com">Brash Robotics</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <exec_depend>b2_description</exec_depend>
+  <exec_depend>b2_platform</exec_depend>
+  <exec_depend>brash_quadruped_driver</exec_depend>
+  <exec_depend>controller_manager</exec_depend>
+  <exec_depend>domain_bridge</exec_depend>
+  <exec_depend>gz_ros2_control</exec_depend>
+  <exec_depend>hesai_ros_driver</exec_depend>
+  <exec_depend>kiss_icp</exec_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>realsense2_camera</exec_depend>
+  <exec_depend>robot_localization</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>ros_gz_bridge</exec_depend>
+  <exec_depend>ros_gz_sim</exec_depend>
+  <exec_depend>rosgraph_msgs</exec_depend>
+  <exec_depend>rtabmap_odom</exec_depend>
+  <exec_depend>rtabmap_slam</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>xacro</exec_depend>
+  <exec_depend>z1_bringup</exec_depend>
+  <exec_depend>z1_description</exec_depend>
+  <exec_depend>z1_hardware_interface</exec_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

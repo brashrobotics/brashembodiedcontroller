@@ -1,0 +1,10 @@
+name: brash_b2_domain_bridge
+from_domain: 0
+to_domain: 10
+topics:
+  /odommodestate:
+    type: unitree_go/msg/SportModeState
+    remap: /b2_unit_001/odommodestate
+  /lf/lowstate:
+    type: unitree_go/msg/LowState
+    remap: /b2_unit_001/lf/lowstate

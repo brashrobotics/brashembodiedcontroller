@@ -1,0 +1,10 @@
+/**:
+  ros__parameters:
+    input_topic: command/cmd_vel
+    enable_topic: safety/enable
+    output_topic: hardware/cmd_vel_guarded
+    command_timeout_sec: 0.25
+    enable_timeout_sec: 0.5
+    publish_rate_hz: 20.0
+    max_linear: [0.7, 0.4, 0.0]
+    max_angular: [0.0, 0.0, 0.7]
