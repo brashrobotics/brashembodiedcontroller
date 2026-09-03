@@ -30,6 +30,66 @@ WHEEL_JOINT_ALIASES = {
 }
 
 
+def _element(document, parent, tag, text=None, **attributes):
+    child = document.createElement(tag)
+    for name, value in attributes.items():
+        child.setAttribute(name, str(value))
+    if text is not None:
+        child.appendChild(document.createTextNode(str(text)))
+    parent.appendChild(child)
+    return child
+
+
+def _add_simulation_camera(document, robot):
+    """Attach a small forward RGB camera used only by the Gazebo launch."""
+    if any(link.getAttribute('name') == 'brash_sim_camera_link'
+           for link in document.getElementsByTagName('link')):
+        raise RuntimeError('B2W description already contains brash_sim_camera_link')
+
+    link = _element(document, robot, 'link', name='brash_sim_camera_link')
+    inertial = _element(document, link, 'inertial')
+    _element(document, inertial, 'origin', xyz='0 0 0', rpy='0 0 0')
+    _element(document, inertial, 'mass', value='0.01')
+    _element(
+        document,
+        inertial,
+        'inertia',
+        ixx='1e-6',
+        ixy='0',
+        ixz='0',
+        iyy='1e-6',
+        iyz='0',
+        izz='1e-6',
+    )
+    visual = _element(document, link, 'visual')
+    _element(document, visual, 'origin', xyz='0 0 0', rpy='0 0 0')
+    geometry = _element(document, visual, 'geometry')
+    _element(document, geometry, 'box', size='0.035 0.08 0.035')
+    material = _element(document, visual, 'material', name='brash_camera_dark')
+    _element(document, material, 'color', rgba='0.04 0.06 0.05 1')
+
+    joint = _element(document, robot, 'joint', name='brash_sim_camera_joint', type='fixed')
+    _element(document, joint, 'parent', link='trunk')
+    _element(document, joint, 'child', link='brash_sim_camera_link')
+    _element(document, joint, 'origin', xyz='0.49 0 0.10', rpy='0 0 0')
+
+    gazebo = _element(document, robot, 'gazebo', reference='brash_sim_camera_link')
+    sensor = _element(document, gazebo, 'sensor', name='brash_sim_front_camera', type='camera')
+    _element(document, sensor, 'always_on', 'true')
+    _element(document, sensor, 'update_rate', '10')
+    _element(document, sensor, 'visualize', 'true')
+    _element(document, sensor, 'topic', '/camera/b2w/front')
+    camera = _element(document, sensor, 'camera')
+    _element(document, camera, 'horizontal_fov', '1.0471975512')
+    image = _element(document, camera, 'image')
+    _element(document, image, 'width', '640')
+    _element(document, image, 'height', '360')
+    _element(document, image, 'format', 'R8G8B8')
+    clip = _element(document, camera, 'clip')
+    _element(document, clip, 'near', '0.05')
+    _element(document, clip, 'far', '30.0')
+
+
 def render(xacro_path, controller_config=None):
     """Return a B2W URDF after applying the vendor simulation compatibility fix."""
     os.environ['B2_DESC'] = '0'
@@ -76,6 +136,8 @@ def render(xacro_path, controller_config=None):
                 'expected exactly one gz_ros2_control controller parameter path, '
                 f'found {updated_parameters}'
             )
+
+    _add_simulation_camera(document, robot)
 
     control_joint_names = {
         joint.getAttribute('name')

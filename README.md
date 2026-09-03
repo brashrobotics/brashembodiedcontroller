@@ -55,6 +55,8 @@ sudo apt install \
   ros-jazzy-ros-gz \
   ros-jazzy-ros2-control \
   ros-jazzy-ros2-controllers \
+  ros-jazzy-position-controllers \
+  ros-jazzy-velocity-controllers \
   ros-jazzy-rosidl-generator-dds-idl \
   ros-jazzy-rtabmap-ros \
   ros-jazzy-tf2-tools \
@@ -147,6 +149,7 @@ in to the bridge:
 
 ```bash
 export BRASH_TELEOP_EDGE_TOKEN='<same value used by brashteleoperation/.env>'
+export BRASH_TELEOP_ROBOT_CONTROL_TOKEN='<robot token from brashteleoperation/.env>'
 ros2 launch brash_quadruped_bringup simulation.launch.py teleop_bridge:=true
 ```
 
@@ -157,6 +160,20 @@ after measured wheel velocity is stopped. Any edge error, invalid state, lost
 ownership, disabled safety state, or command watchdog timeout publishes zero.
 Its publishers are restricted to `/joint_position_controller/commands` and
 `/velocity_controller/commands`, which exist only in this Gazebo launch.
+
+The same launch also adds a simulated forward RGB camera and starts an isolated
+camera bridge. It publishes `/camera/b2w/front/image_raw`, encodes bounded PNG
+frames at 5 Hz, and sends them only to the loopback media gateway. Closing the
+Gazebo GUI no longer stops the server or either bridge; stop the foreground ROS
+launch explicitly with Ctrl-C.
+
+To start Compose and the embodied simulation together after both repositories
+are configured and built:
+
+```bash
+cd /home/aras/brashrobotics/brashteleoperation
+./scripts/run-b2w-simulation.sh
+```
 
 Bring up the base, sensor drivers, LIO fusion, and RGB-D odometry:
 

@@ -53,3 +53,17 @@ def differential_wheel_velocities(
         left *= scale
         right *= scale
     return left, right, left, right
+
+
+def b2w_gazebo_wheel_velocities(
+    linear_x: float,
+    angular_z: float,
+    wheel_radius: float,
+    track_width: float,
+    maximum_wheel_speed: float,
+) -> tuple[float, float, float, float]:
+    """Map base motion to the vendor Gazebo model's reversed wheel axes."""
+    conventional = differential_wheel_velocities(
+        linear_x, angular_z, wheel_radius, track_width, maximum_wheel_speed
+    )
+    return tuple(-speed for speed in conventional)

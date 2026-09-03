@@ -12,11 +12,12 @@ from urllib.parse import urljoin, urlparse
 from urllib.request import Request, urlopen
 
 import rclpy
+from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64MultiArray
 
-from .command_utils import differential_wheel_velocities
+from .command_utils import b2w_gazebo_wheel_velocities
 
 
 WHEEL_JOINTS = ('FL_wheel_joint', 'FR_wheel_joint', 'RL_wheel_joint', 'RR_wheel_joint')
@@ -190,13 +191,16 @@ class B2WTeleopSimulationBridge(Node):
             or abs(angular_z) > self._max_angular_z + 1e-6
         ):
             raise ValueError('edge output exceeded the simulation bridge limit')
-        wheel_speeds = differential_wheel_velocities(
+        wheel_speeds = b2w_gazebo_wheel_velocities(
             linear_x,
             angular_z,
             self._wheel_radius,
             self._track_width,
             self._max_wheel_speed,
         )
+        # The vendor B2W URDF wheel axes are opposite the conventional mobile
+        # base sign: positive joint velocity drives toward base -X. Invert all
+        # four joints so positive teleop X and yaw match REP-103 base motion.
         self._wheel_publisher.publish(Float64MultiArray(data=list(wheel_speeds)))
 
     def _publish_stop(self) -> None:
@@ -282,11 +286,12 @@ def main(args=None) -> None:
     node = B2WTeleopSimulationBridge()
     try:
         rclpy.spin(node)
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, ExternalShutdownException):
         pass
     finally:
         node.destroy_node()
-        rclpy.shutdown()
+        if rclpy.ok():
+            rclpy.shutdown()
 
 
 if __name__ == '__main__':

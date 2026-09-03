@@ -9,6 +9,9 @@
     <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics"/>
     <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands"/>
     <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
 
     <gravity>0 0 -9.80665</gravity>
     <scene>
@@ -54,6 +57,23 @@
             <diffuse>0.55 0.55 0.55 1</diffuse>
           </material>
         </visual>
+      </link>
+    </model>
+
+    <!-- High-contrast simulation landmarks make forward motion and yaw
+         immediately visible in the onboard teleoperation camera. -->
+    <model name="teleop_landmarks">
+      <static>true</static>
+      <link name="landmarks">
+        <visual name="lane_1"><pose>1 0 0.006 0 0 0</pose><geometry><box><size>0.5 0.06 0.01</size></box></geometry><material><ambient>0.9 0.75 0.05 1</ambient><diffuse>0.9 0.75 0.05 1</diffuse></material></visual>
+        <visual name="lane_2"><pose>2 0 0.006 0 0 0</pose><geometry><box><size>0.5 0.06 0.01</size></box></geometry><material><ambient>0.9 0.75 0.05 1</ambient><diffuse>0.9 0.75 0.05 1</diffuse></material></visual>
+        <visual name="lane_3"><pose>3 0 0.006 0 0 0</pose><geometry><box><size>0.5 0.06 0.01</size></box></geometry><material><ambient>0.9 0.75 0.05 1</ambient><diffuse>0.9 0.75 0.05 1</diffuse></material></visual>
+        <visual name="lane_4"><pose>4 0 0.006 0 0 0</pose><geometry><box><size>0.5 0.06 0.01</size></box></geometry><material><ambient>0.9 0.75 0.05 1</ambient><diffuse>0.9 0.75 0.05 1</diffuse></material></visual>
+        <visual name="lane_5"><pose>5 0 0.006 0 0 0</pose><geometry><box><size>0.5 0.06 0.01</size></box></geometry><material><ambient>0.9 0.75 0.05 1</ambient><diffuse>0.9 0.75 0.05 1</diffuse></material></visual>
+        <visual name="left_gate"><pose>3 1.1 0.6 0 0 0</pose><geometry><box><size>0.18 0.18 1.2</size></box></geometry><material><ambient>0.1 0.75 0.75 1</ambient><diffuse>0.1 0.75 0.75 1</diffuse></material></visual>
+        <visual name="right_gate"><pose>3 -1.1 0.6 0 0 0</pose><geometry><box><size>0.18 0.18 1.2</size></box></geometry><material><ambient>0.95 0.35 0.1 1</ambient><diffuse>0.95 0.35 0.1 1</diffuse></material></visual>
+        <visual name="target_crate"><pose>5 0.8 0.35 0 0 0</pose><geometry><box><size>0.7 0.7 0.7</size></box></geometry><material><ambient>0.2 0.75 0.25 1</ambient><diffuse>0.2 0.75 0.25 1</diffuse></material></visual>
+        <visual name="far_wall"><pose>8 0 1.0 0 0 0</pose><geometry><box><size>0.1 5 2</size></box></geometry><material><ambient>0.25 0.3 0.35 1</ambient><diffuse>0.25 0.3 0.35 1</diffuse></material></visual>
       </link>
     </model>
   </world>

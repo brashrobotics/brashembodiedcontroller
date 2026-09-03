@@ -26,6 +26,7 @@ setup(
             "unitree_imu_bridge = brash_quadruped_driver.unitree_imu_bridge:main",
             "velocity_guard = brash_quadruped_driver.velocity_guard:main",
             "b2w_teleop_sim_bridge = brash_quadruped_driver.b2w_teleop_sim_bridge:main",
+            "b2w_camera_sim_bridge = brash_quadruped_driver.b2w_camera_sim_bridge:main",
         ],
     },
 )

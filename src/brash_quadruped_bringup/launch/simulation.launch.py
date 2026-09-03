@@ -63,6 +63,7 @@ def generate_launch_description():
             DeclareLaunchArgument('gui', default_value='true'),
             DeclareLaunchArgument('teleop_bridge', default_value='false'),
             DeclareLaunchArgument('teleop_edge_url', default_value='http://127.0.0.1:4311/'),
+            DeclareLaunchArgument('teleop_media_url', default_value='http://127.0.0.1:4312/'),
             DeclareLaunchArgument('entity_name', default_value='brash_b2w'),
             DeclareLaunchArgument('spawn_x', default_value='0.0'),
             DeclareLaunchArgument('spawn_y', default_value='0.0'),
@@ -90,7 +91,9 @@ def generate_launch_description():
                 PythonLaunchDescriptionSource(gz_sim_launch),
                 launch_arguments={
                     'gz_args': '-g -v 4',
-                    'on_exit_shutdown': 'true',
+                    # Closing the window must not silently kill a live server
+                    # and leave the operator console connected to no simulator.
+                    'on_exit_shutdown': 'false',
                 }.items(),
                 condition=IfCondition(LaunchConfiguration('gui')),
             ),
@@ -159,6 +162,8 @@ def generate_launch_description():
                             'joint_position_controller',
                             '--controller-manager',
                             '/controller_manager',
+                            '--service-call-timeout',
+                            '30.0',
                         ],
                     ),
                     Node(
@@ -170,6 +175,8 @@ def generate_launch_description():
                             'velocity_controller',
                             '--controller-manager',
                             '/controller_manager',
+                            '--service-call-timeout',
+                            '30.0',
                         ],
                     ),
                 ],
@@ -189,7 +196,20 @@ def generate_launch_description():
                             }
                         ],
                         condition=IfCondition(LaunchConfiguration('teleop_bridge')),
-                    )
+                    ),
+                    Node(
+                        package='brash_quadruped_driver',
+                        executable='b2w_camera_sim_bridge',
+                        name='b2w_camera_sim_bridge',
+                        output='screen',
+                        parameters=[
+                            {
+                                'use_sim_time': False,
+                                'media_url': LaunchConfiguration('teleop_media_url'),
+                            }
+                        ],
+                        condition=IfCondition(LaunchConfiguration('teleop_bridge')),
+                    ),
                 ],
             ),
         ]
