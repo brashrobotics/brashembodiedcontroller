@@ -136,10 +136,27 @@ ros2 launch brash_quadruped_bringup simulation.launch.py gui:=false
 This launch uses the vendor `b2_description` Xacro and its Gazebo control
 plugin. The Brash renderer corrects the vendor simulation's stale
 `*_foot_fixed` ros2_control names to the B2W URDF's actual `*_wheel_joint`
-names without modifying `/home/aras/avs_ws`. It currently visualizes the B2W
-base model only. The physical Hesai,
+names without modifying `/home/aras/avs_ws`. It starts Gazebo-only position and
+wheel velocity controllers and holds a conservative standing pose. The physical Hesai,
 RealSense, and Z1 processes are intentionally not launched, and their separate
 TF attachments are not Gazebo geometry.
+
+To connect the B2W simulation to the BRASH teleoperation edge, export the
+simulation edge credential without putting it on the ROS command line and opt
+in to the bridge:
+
+```bash
+export BRASH_TELEOP_EDGE_TOKEN='<same value used by brashteleoperation/.env>'
+ros2 launch brash_quadruped_bringup simulation.launch.py teleop_bridge:=true
+```
+
+The bridge accepts only a plain-HTTP loopback edge URL. It converts the edge's
+accepted X/yaw command to wheel angular velocities, rejects lateral motion,
+reports controller and joint-state health, and acknowledges ownership only
+after measured wheel velocity is stopped. Any edge error, invalid state, lost
+ownership, disabled safety state, or command watchdog timeout publishes zero.
+Its publishers are restricted to `/joint_position_controller/commands` and
+`/velocity_controller/commands`, which exist only in this Gazebo launch.
 
 Bring up the base, sensor drivers, LIO fusion, and RGB-D odometry:
 

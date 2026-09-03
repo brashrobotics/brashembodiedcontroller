@@ -45,6 +45,8 @@ def generate_launch_description():
             description_renderer,
             ' --xacro ',
             vendor_xacro,
+            ' --controller-config ',
+            PathJoinSubstitution([package_share, 'config', 'b2w_sim_controllers.yaml']),
         ]
     )
     robot_description = {'robot_description': robot_description_content}
@@ -59,6 +61,8 @@ def generate_launch_description():
                 default_value=PathJoinSubstitution([package_share, 'worlds', 'empty.sdf']),
             ),
             DeclareLaunchArgument('gui', default_value='true'),
+            DeclareLaunchArgument('teleop_bridge', default_value='false'),
+            DeclareLaunchArgument('teleop_edge_url', default_value='http://127.0.0.1:4311/'),
             DeclareLaunchArgument('entity_name', default_value='brash_b2w'),
             DeclareLaunchArgument('spawn_x', default_value='0.0'),
             DeclareLaunchArgument('spawn_y', default_value='0.0'),
@@ -138,6 +142,53 @@ def generate_launch_description():
                             '-allow_renaming',
                             'false',
                         ],
+                    )
+                ],
+            ),
+            # These controllers claim only Gazebo interfaces. No Unitree SDK
+            # process or physical command topic is started by this launch file.
+            TimerAction(
+                period=5.0,
+                actions=[
+                    Node(
+                        package='controller_manager',
+                        executable='spawner',
+                        name='spawn_b2w_leg_position_controller',
+                        output='screen',
+                        arguments=[
+                            'joint_position_controller',
+                            '--controller-manager',
+                            '/controller_manager',
+                        ],
+                    ),
+                    Node(
+                        package='controller_manager',
+                        executable='spawner',
+                        name='spawn_b2w_wheel_velocity_controller',
+                        output='screen',
+                        arguments=[
+                            'velocity_controller',
+                            '--controller-manager',
+                            '/controller_manager',
+                        ],
+                    ),
+                ],
+            ),
+            TimerAction(
+                period=7.0,
+                actions=[
+                    Node(
+                        package='brash_quadruped_driver',
+                        executable='b2w_teleop_sim_bridge',
+                        name='b2w_teleop_sim_bridge',
+                        output='screen',
+                        parameters=[
+                            {
+                                'use_sim_time': False,
+                                'edge_url': LaunchConfiguration('teleop_edge_url'),
+                            }
+                        ],
+                        condition=IfCondition(LaunchConfiguration('teleop_bridge')),
                     )
                 ],
             ),

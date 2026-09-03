@@ -30,7 +30,7 @@ WHEEL_JOINT_ALIASES = {
 }
 
 
-def render(xacro_path):
+def render(xacro_path, controller_config=None):
     """Return a B2W URDF after applying the vendor simulation compatibility fix."""
     os.environ['B2_DESC'] = '0'
     os.environ['B2_W_DESC'] = '1'
@@ -57,6 +57,26 @@ def render(xacro_path):
         if old_name in WHEEL_JOINT_ALIASES:
             element.firstChild.nodeValue = WHEEL_JOINT_ALIASES[old_name]
 
+    if controller_config is not None:
+        controller_config = os.path.abspath(controller_config)
+        if not os.path.isfile(controller_config):
+            raise RuntimeError(f'simulation controller config does not exist: {controller_config}')
+        updated_parameters = 0
+        for plugin in document.getElementsByTagName('plugin'):
+            if plugin.getAttribute('name') != 'gz_ros2_control::GazeboSimROS2ControlPlugin':
+                continue
+            for element in plugin.getElementsByTagName('parameters'):
+                if element.firstChild is None:
+                    element.appendChild(document.createTextNode(controller_config))
+                else:
+                    element.firstChild.nodeValue = controller_config
+                updated_parameters += 1
+        if updated_parameters != 1:
+            raise RuntimeError(
+                'expected exactly one gz_ros2_control controller parameter path, '
+                f'found {updated_parameters}'
+            )
+
     control_joint_names = {
         joint.getAttribute('name')
         for control in document.getElementsByTagName('ros2_control')
@@ -76,10 +96,14 @@ def main():
     """Render the corrected description to standard output for ROS launch."""
     parser = argparse.ArgumentParser()
     parser.add_argument('--xacro', required=True, help='Vendor B2W robot.xacro path')
+    parser.add_argument(
+        '--controller-config',
+        help='Optional replacement gz_ros2_control YAML used by the rendered simulation URDF',
+    )
     args = parser.parse_args()
 
     try:
-        sys.stdout.write(render(args.xacro))
+        sys.stdout.write(render(args.xacro, args.controller_config))
     except Exception as error:  # launch needs a concise renderer failure on stderr
         print(f'Failed to render B2W simulation description: {error}', file=sys.stderr)
         return 1
