@@ -227,7 +227,11 @@ class B2WTeleopSimulationBridge(Node):
         return _object(decoded, 'response')
 
     def destroy_node(self):
-        self._publish_stop()
+        # ROS signal handling can invalidate the context before launch calls
+        # destroy_node(). Publishing after that point raises RCLError and makes
+        # an otherwise clean simulator shutdown look like a bridge failure.
+        if self.context.ok():
+            self._publish_stop()
         return super().destroy_node()
 
 
